@@ -1,2 +1,2 @@
 # ECDH
-Elliptic Curve Diffie-Hellman Key Exchange
+Elliptic Curve Diffie-Hellman Key Exchange Implementation
