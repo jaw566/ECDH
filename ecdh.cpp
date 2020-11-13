@@ -50,6 +50,7 @@ unsigned int make_positive(int a, unsigned int m) {
   return a % m;
 }
 
+// note: non-commutative (x1,y1) + (x2,y2) != (x2,y2) + (x1,y1)
 void point_addition(unsigned int m, int x1, int y1, 
                     int x2, int y2, 
                     int *x3, int *y3) 
@@ -66,3 +67,53 @@ void point_doubling(unsigned int m, int a, int x1, int y1, int *x3, int *y3)
   *x3 = make_positive(pow(slope, 2) - 2 * x1, m);
   *y3 = make_positive(slope * (x1 - *x3) - y1, m);
 }
+
+/*
+  Input:  integer to check (n)
+  Output: return index of first set bit starting from the left
+*/
+int first_set_bit(int n)
+{
+  int i;
+  for(i=sizeof(int)-1; i>=0; --i)
+  {
+    if( ((1 << i) & n) )
+      return i;
+  }
+  return 0;
+}
+
+/*
+  Input:  secret key (sk), 
+          modulus (m),
+          elliptic curve coeff (a), 
+          primitive (P_x, P_y)
+  Output: public key (T_x, T_y)
+*/
+void make_pk(int sk, int P_x, int P_y, int *T_x, int *T_y, unsigned int m, int a)
+{
+  int i = 0;
+  *T_x = P_x; 
+  *T_y = P_y;
+
+  for(i=first_set_bit( sk )-1; i>=0; --i) 
+  {
+    point_doubling(m, a, *T_x, *T_y, T_x, T_y);
+
+    if( (1 << i) & sk ) // if the bit at index 'i' is 1 then point addition
+      point_addition(m, *T_x, *T_y, P_x, P_y, T_x, T_y);
+  }
+}
+
+/*
+  Input:  secret key (sk), 
+          other entity public key (T_x, T_y),
+          elliptic curve coeff (a),
+          modulus (m)
+  Output: shared secret key (shared_x, shared_y)
+*/
+void get_shared_key(int sk, int T_x, int T_y, int *shared_x, int *shared_y, unsigned int m, int a)
+{
+  make_pk(sk, T_x, T_y, shared_x, shared_y, m, a);
+}
+
