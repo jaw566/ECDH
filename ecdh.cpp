@@ -8,7 +8,7 @@
 
 #include "ecdh.h"
 
-unsigned int find_inverse(unsigned int a, unsigned int m) 
+int find_inverse(int a, unsigned int m) 
 { 
   int t, s; 
   int gcd = ext_euclidian_alg(a, m, &t, &s);
@@ -23,8 +23,8 @@ unsigned int find_inverse(unsigned int a, unsigned int m)
     // return 1;
   }
 } 
-  
-unsigned int ext_euclidian_alg(unsigned int a, unsigned int b, int *t, int *s) 
+
+int ext_euclidian_alg(int a, int b, int *t, int *s) 
 { 
   // Base Case 
   if (a == 0)  
@@ -50,14 +50,19 @@ unsigned int make_positive(int a, unsigned int m) {
   return a % m;
 }
 
-void point_addition(unsigned int m, unsigned int x1, unsigned int y1, 
-                    unsigned int x2, unsigned int y2, 
-                    unsigned int *x3, unsigned int *y3) 
+void point_addition(unsigned int m, int x1, int y1, 
+                    int x2, int y2, 
+                    int *x3, int *y3) 
 {
-  unsigned int temp = make_positive(x2 - x1, m);
+  int temp = make_positive(x2 - x1, m);
   int slope = make_positive((y2 - y1) * find_inverse(temp, m), m);
-
   *x3 = make_positive((pow(slope, 2) - x1 - x2), m);
-
   *y3 = make_positive((slope * (x1 - *x3) - y1), m);
+}
+
+void point_doubling(unsigned int m, int a, int x1, int y1, int *x3, int *y3) 
+{
+  int slope = (3 * pow(x1, 2) + a) * find_inverse(2 * y1, m);
+  *x3 = make_positive(pow(slope, 2) - 2 * x1, m);
+  *y3 = make_positive(slope * (x1 - *x3) - y1, m);
 }
