@@ -75,7 +75,7 @@ void point_doubling(unsigned int m, int a, int x1, int y1, int *x3, int *y3)
 int first_set_bit(int n)
 {
   int i;
-  for(i=sizeof(int)-1; i>=0; --i)
+  for(i=(sizeof(int)*8)-1; i>=0; --i)
   {
     if( ((1 << i) & n) )
       return i;
@@ -90,7 +90,7 @@ int first_set_bit(int n)
           primitive (P_x, P_y)
   Output: public key (T_x, T_y)
 */
-void make_pk(int sk, int P_x, int P_y, int *T_x, int *T_y, unsigned int m, int a)
+void make_pk_fast(int sk, int P_x, int P_y, int *T_x, int *T_y, unsigned int m, int a)
 {
   int i = 0;
   *T_x = P_x; 
@@ -107,6 +107,27 @@ void make_pk(int sk, int P_x, int P_y, int *T_x, int *T_y, unsigned int m, int a
 
 /*
   Input:  secret key (sk), 
+          modulus (m),
+          elliptic curve coeff (a), 
+          primitive (P_x, P_y)
+  Output: public key (T_x, T_y)
+*/
+void make_pk_slow(int sk, int P_x, int P_y, int *T_x, int *T_y, unsigned int m, int a)
+{
+  point_doubling(m, a, P_x, P_y, T_x, T_y);
+
+  sk -= 2;
+  
+  while(sk > 0)
+  {
+    point_addition(m, *T_x, *T_y, P_x, P_y, T_x, T_y);
+
+    --sk;
+  }
+}
+
+/*
+  Input:  secret key (sk), 
           other entity public key (T_x, T_y),
           elliptic curve coeff (a),
           modulus (m)
@@ -114,6 +135,6 @@ void make_pk(int sk, int P_x, int P_y, int *T_x, int *T_y, unsigned int m, int a
 */
 void get_shared_key(int sk, int T_x, int T_y, int *shared_x, int *shared_y, unsigned int m, int a)
 {
-  make_pk(sk, T_x, T_y, shared_x, shared_y, m, a);
+  make_pk_fast(sk, T_x, T_y, shared_x, shared_y, m, a);
 }
 
