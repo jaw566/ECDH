@@ -8,6 +8,11 @@
 
 #include "ecdh.h"
 
+/*
+  Input:  integer to find inverse of (a),
+          modulus (m)
+  Output: return inverse of a mod m.
+*/
 int find_inverse(int a, unsigned int m) 
 { 
   int t, s; 
@@ -15,15 +20,14 @@ int find_inverse(int a, unsigned int m)
 
   if (gcd == 1) 
   { 
-    // m is added to handle negative x 
     return make_positive(t, m); 
-  }
-  else {
-    // fprintf("Cannot find inverse\n");
-    // return 1;
   }
 } 
 
+/*
+  Description: Finds t and s such that a*t + b*s = gcd(a, b)
+  Output: return gcd(a, b).
+*/
 int ext_euclidian_alg(int a, int b, int *t, int *s) 
 { 
   // Base Case 
@@ -43,6 +47,11 @@ int ext_euclidian_alg(int a, int b, int *t, int *s)
   return gcd; 
 } 
 
+/*
+  Input:  integer to make positive mod m (a)
+          modulus (m)
+  Output: return positive integer congruent to a mod m
+*/
 unsigned int make_positive(int a, unsigned int m) {
   while(a < 0) {
     a += m;
@@ -50,7 +59,13 @@ unsigned int make_positive(int a, unsigned int m) {
   return a % m;
 }
 
-// note: non-commutative (x1,y1) + (x2,y2) != (x2,y2) + (x1,y1)
+/*
+  Input:  modulus (m)
+          first point (x1, y1)
+          second point (x2, y2)
+  Output: sum of the input points (x3, y3)
+  note: non-commutative (x1,y1) + (x2,y2) != (x2,y2) + (x1,y1)
+*/
 void point_addition(unsigned int m, int x1, int y1, 
                     int x2, int y2, 
                     int *x3, int *y3) 
@@ -61,6 +76,11 @@ void point_addition(unsigned int m, int x1, int y1,
   *y3 = make_positive((slope * (x1 - *x3) - y1), m);
 }
 
+/*
+  Input:  modulus (m)
+          point (x1, y1)
+  Output: sum of the input point (x3, y3)
+*/
 void point_doubling(unsigned int m, int a, int x1, int y1, int *x3, int *y3) 
 {
   int slope = (3 * pow(x1, 2) + a) * find_inverse(2 * y1, m);
